@@ -1,0 +1,109 @@
+from bs4 import BeautifulSoup as bs
+from urllib.request import urlopen
+import csv
+import numpy as np
+html=urlopen("https://ru.tradingview.com/markets/stocks-russia/sectorandindustry-industry")
+soup=bs(html, 'html5lib')
+# индекс 0
+otrasl=[]
+# индекс 1
+capital=[]
+# индекс 2
+dividend=[]
+# индекс 3
+value=[]
+# индекс 4
+index=[]
+# индекс 5
+sektor=[]
+# индекс 6
+instrumenty=[]
+# индекс 7
+ammount=[]
+
+character_map = {
+ ord('\n') : '',
+ ord('\t') : '',
+ ord('\r') : ''
+}
+
+var_otrasl=soup.findAll('tr')
+test=soup.find('tr')  
+for n in soup.select('td:nth-child(1)'):    
+    otrasl.append(n.get_text())
+    
+for n in soup.select('td:nth-child(2)'):    
+    if n.get_text()==' ':
+        capital.append('-')               
+    else:
+        capital.append(n.get_text())      
+       
+for n in soup.select('td:nth-child(3)'):    
+    if n.get_text()=='':
+        value.append('-')
+    else:
+        value.append(n.get_text())        
+        
+for n in soup.select('td:nth-child(4)'):    
+    if n.get_text()=='':
+        index.append('-')
+    else:
+        index.append(n.get_text())
+    
+for n in soup.select('td:nth-child(5)'):    
+    if n.get_text()=='':
+        sektor.append('-')
+    else:
+        sektor.append(n.get_text())    
+        
+for n in soup.select('td:nth-child(6)'):    
+    if n.get_text()=='':
+        instrumenty.append('-')
+    else:
+        instrumenty.append(n.get_text()) 
+    
+for n in soup.select('td:nth-child(7)'):    
+    if n.get_text()=='':
+        ammount.append('-')
+    else:
+        ammount.append(n.get_text()) 
+pure_otrasl=[]
+for n in otrasl:
+    proxy=n
+    proxy=proxy.translate(character_map)
+    pure_otrasl.append(proxy)
+
+arr_otrasl=np.array(pure_otrasl)
+np.reshape(arr_otrasl,[64,1])
+
+arr_capital=np.array(capital)
+np.reshape(arr_capital,[64,1])
+
+arr_value=np.array(value)
+np.reshape(arr_value,[64,1])
+
+arr_index=np.array(index)
+np.reshape(arr_index,[64,1])
+
+arr_sektor=np.array(sektor)
+np.reshape(arr_sektor,[64,1])
+
+arr_instrumenty=np.array(instrumenty)
+np.reshape(arr_instrumenty,[64,1])
+
+arr_ammount=np.array(ammount)
+np.reshape(arr_ammount,[64,1])
+
+new_array=np.dstack((arr_otrasl, arr_capital, arr_value, arr_index, arr_sektor, arr_instrumenty, arr_ammount))
+a=np.array(['Отрасль','Рын. кап.','Доходность','Имз. в %','Объем','Сектор','Акции'])
+
+np.reshape=(new_array,[64,7])
+
+myFile=open('example.csv', 'w', newline='')
+with myFile:
+    writer=csv.writer(myFile, dialect='excel', delimiter=' ',quoting=csv.QUOTE_MINIMAL)
+    writer.writerows([a])
+    for n in new_array:
+    #writer.writecolumns([arr_otrasl] + [arr_capital])
+        writer.writerows(n)
+print("Writing complete")
